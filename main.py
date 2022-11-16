@@ -19,13 +19,13 @@ def PreProcessing():
     df.columns = colnames
 
     # Separating the columns that have ints as column values and not words (ie. object datatype)
-    df_nonCategories = df.select_dtypes(exclude='object')
+    # df_nonCategories = df.select_dtypes(exclude='object')
 
     # Change label to binary; 1 if income greater than 50K; 0 if income lessthan or equal to 50K
     df["income"] = np.where(df["income"].str.contains(">50K"), 1, 0)
 
-    df_Categories = df.select_dtypes(include='object')
-    cols = df_nonCategories.columns
+    # df_Categories = df.select_dtypes(include='object')
+    # cols = df_nonCategories.columns
 
     # For binary classification, change categorical to binary values (ie. One Hot Encoding)
     df = pd.get_dummies(df)
@@ -35,7 +35,7 @@ def PreProcessing():
     df.pop("income")
     X = df.values
 
-    # Splitting data into training and testing set
+    # Splitting data into training 90% and testing set 10%
     X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.10, random_state=42)
 
     # Normalizing the data
@@ -49,7 +49,6 @@ def KNNEval(df,X_train, X_test, y_train, y_test):
     # Further split the training data into 80% training and 20% validation
     val_split = round(len(df)*0.2)
     x_train_tr, y_train_tr = X_train[:val_split], y_train[:val_split]
-    # x_train_va, y_train_va = X_train[val_split:], y_train[val_split:]
 
     # Finding best hyperparameter K for K-Nearest Neighbours (KNN)
     model_choices = []
@@ -58,7 +57,6 @@ def KNNEval(df,X_train, X_test, y_train, y_test):
     for k in range(1, 15):
         knn = KNN(k)
         knn.fit(x_train_tr, y_train_tr)
-        # train_sc = knn.score(x_train_tr, y_train_tr)
         test_sc = np.mean(cross_val_score(knn, x_train_tr, y_train_tr, cv=10))
         model_choices.append(k)
         valid_acc.append(test_sc)
@@ -134,10 +132,3 @@ if __name__ == '__main__':
     print(cr)
     ROC(X_train, y_train, X_test, y_test)
 
-
-
-# Results
-
-# Training accuracy very close to testing accuracy so no signs of overfitting
-# roc, auc of the model is close to 1 so model closely predicts whether a person makes over 50K/year.
-# -> Perfect classifier has ROC AUC equal to 1, but random model has ROC AUC equal to 0.5.
